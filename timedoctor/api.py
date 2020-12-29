@@ -1,14 +1,14 @@
 from typing import Dict
 from requests import Session
 from datetime import datetime
-from timedoctor.utils import get_date_past_days
+from timedoctor.utils import get_date_past_days, convert_timestamp_to_hour
 
 class Client:
     API_ENDPOINT = 'https://api2.timedoctor.com/api/1.0/'
 
     def __init__(self , email: str = None , password: str = None):
         if email == None or password == None:
-            print('Please provide email and password')
+            raise Exception('Please provide email and password')
         # Credentials
         self.email: str = email
         self.password: str = password
@@ -62,9 +62,7 @@ class Client:
 
         return False
 
-    def get_time(self, 
-                    date_from:str = get_date_past_days(30), 
-                    date_to:str = get_date_past_days(0)) -> dict:
+    def get_time(self, date_from:str = get_date_past_days(30), date_to:str = get_date_past_days(0)) -> dict:
         """get_time
 
         Args:
@@ -91,5 +89,22 @@ class Client:
                 url = self.API_ENDPOINT+'stats/summary-ratio',
                 params=params
             )
-            return response
+            return response.json()['data']['users'][0]
         raise Exception('No Token, Please Log in')
+
+    def parse_summary(self, data:dict = {}) -> Dict[str,str]:
+        """Parsing summary response to valid datetime value
+
+        Args:
+            data (dict, optional): json response from summary API. Defaults to {}.
+
+        Returns:
+            Dict[str,str]: Parsed data
+        """
+        return {
+            'total':convert_timestamp_to_hour(data['total']),
+            'productive_time':convert_timestamp_to_hour(data['prod']),
+            'neutral_time':convert_timestamp_to_hour(data['neutral']),
+            'unproductive_time':convert_timestamp_to_hour(data['unprod']),
+            'manual_time':convert_timestamp_to_hour(data['manual'])
+        }
