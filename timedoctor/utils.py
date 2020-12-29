@@ -14,3 +14,8 @@ def get_date_past_days(days: int = 0) -> str:
 
     changed_time: datetime = now - past
     return changed_time.isoformat() + '.000Z'
+
+def convert_timestamp_to_hour(timestamp: int = 0) -> str:
+    converted_timestamp = "{:.1f}".format(timestamp / 60 / 60).split('.')
+    converted_timestamp[1] = str(int(converted_timestamp[1]) * 5)
+    return '{0}h {1}m'.format(converted_timestamp[0],converted_timestamp[1])
